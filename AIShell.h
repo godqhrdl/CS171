@@ -35,7 +35,7 @@ public:
 	Move makeMove();
     
     //Find all available move
-    void find_all_avl(std::queue<std::pair<int,int> > all);
+    void find_all_avl(std::queue<std::pair<int,int> > &all);
     //void print_all_aval(std::queue<std::pair<int,int> > all);
     
     //Evaluate Function
@@ -49,8 +49,20 @@ public:
     bool no_empty_space(int **current_state);
     
     //Minimax Search
+    std::pair<int,int> best_move;
+    bool AIMove;
+    //int AIboard[10];
+    
     int minimax_search(int **current_state, int depth);
-    int max_search(int **current_state, int depth);
+    int max_search(int depth);
+    int min_search(int depth);
+    std::pair<int,int> next_move(std::queue<std::pair<int,int> > &all);
+    void undo_move(std::pair<int,int> p_move);
+    
+    
+    //Print current gameboard for debugging
+    void print_current_state(int **current_state);
+    
     
 };
 
