@@ -5,6 +5,8 @@
 #include "Move.h"
 #include <queue>
 
+#include <string>
+
 
 // A new AIShell will be created for every move request.
 class AIShell{
@@ -39,6 +41,9 @@ public:
     //void print_all_aval(std::queue<std::pair<int,int> > all);
     
     //Evaluate Function
+    std::string ai_win_string;
+    std::string hm_win_string;
+    
     int evalutate(int **current_state);
     
     //Test terminal node
@@ -56,7 +61,7 @@ public:
     int minimax_search(int **current_state, int depth);
     int max_search(int depth);
     int min_search(int depth);
-    std::pair<int,int> next_move(std::queue<std::pair<int,int> > &all);
+    std::pair<int,int> next_move(std::queue<std::pair<int,int> > &all,bool aimove);
     void undo_move(std::pair<int,int> p_move);
     
     
