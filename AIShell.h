@@ -46,6 +46,10 @@ public:
     
     int evalutate(int **current_state);
     
+    int horizontal_eval(int **current_state);
+    int vertical_eval(int **current_state);
+    int diagonal_eval(int **current_state);
+    
     //Test terminal node
     bool test_terminal_node(int **current_state);
     bool test_horizontal(int **current_state);
