@@ -2,7 +2,7 @@
 #include <iostream>
 #include <queue>
 
-#define LIMITED_DEPTH 3
+#define LIMITED_DEPTH 6
 
 
 AIShell::AIShell(int numCols, int numRows, bool gravityOn, int** gameState, Move lastMove)
@@ -58,6 +58,7 @@ Move AIShell::makeMove(){
 //    print_current_state(gameState);
     
     Move f(best_move.first,best_move.second);
+    std::cout << "Final move: " << best_move.first << "," << best_move.second << std::endl;
     return f;
 
 	 
@@ -79,6 +80,10 @@ bool AIShell::test_horizontal(int **current_state){
                 count_ai++;
                 count_hm = 0;
             }
+            if(current_state[col][row] == 0){
+                count_ai = 0;
+                count_hm = 0;
+            }
             if(current_state[col][row] == -1){
                 count_ai = 0;
                 count_hm++;
@@ -87,6 +92,7 @@ bool AIShell::test_horizontal(int **current_state){
         
         if(count_hm == k || count_ai == k){
             std::cout << "find horizontal winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+            //std::cout << "------------------TEST LINE-----------------" << std::endl;
             return true;
         }
     }
@@ -101,6 +107,10 @@ bool AIShell::test_vertical(int **current_state){
             if(current_state[col][row] == 1){
                 count_ai++;
                 count_hm =0;
+            }
+            if(current_state[col][row] == 0){
+                count_ai = 0;
+                count_hm = 0;
             }
             if(current_state[col][row] == -1){
                 count_ai=0;
@@ -128,6 +138,10 @@ bool AIShell::test_diagonal(int **current_state){
                 count_ai++;
                 count_hm = 0;
             }
+            if(current_state[c][r] == 0){
+                count_ai = 0;
+                count_hm = 0;
+            }
             if(current_state[c][r] == -1){
                 count_ai=0;
                 count_hm++;
@@ -145,6 +159,10 @@ bool AIShell::test_diagonal(int **current_state){
         for(;c<numCols && r<numRows; c++, r++){
             if(current_state[c][r] == 1){
                 count_ai++;
+                count_hm = 0;
+            }
+            if(current_state[c][r] == 0){
+                count_ai = 0;
                 count_hm = 0;
             }
             if(current_state[c][r] == -1){
@@ -168,6 +186,10 @@ bool AIShell::test_diagonal(int **current_state){
                 count_ai++;
                 count_hm = 0;
             }
+            if(current_state[c][r] == 0){
+                count_ai = 0;
+                count_hm = 0;
+            }
             if(current_state[c][r] == -1){
                 count_ai=0;
                 count_hm++;
@@ -185,6 +207,10 @@ bool AIShell::test_diagonal(int **current_state){
         for(;c<numCols && r>=0; c++,r--){
             if(current_state[c][r] == 1){
                 count_ai++;
+                count_hm = 0;
+            }
+            if(current_state[c][r] == 0){
+                count_ai = 0;
                 count_hm = 0;
             }
             if(current_state[c][r] == -1){
@@ -231,18 +257,22 @@ int AIShell::minimax_search(int **current_state, int depth){
 //Max function for Minimax Search
 int AIShell::max_search(int depth){
     int best = -9999999;
-    if(depth == 0 || test_terminal_node(gameState))
+    std::cout << "------------------TEST LINE-----------------" << std::endl;
+    if(depth == 0 || test_terminal_node(gameState)){
+        
         return evalutate(gameState);
+    }
+    
     
     std::queue<std::pair<int,int> > next_all; //A queue contains all availabe moves
     find_all_avl(next_all);
     while(!next_all.empty()){
         
-        std::cout << "**********Current Depth: " << LIMITED_DEPTH-depth << std::endl;
+        //std::cout << "**********Current Depth: " << LIMITED_DEPTH-depth << std::endl;
         
         std::pair<int,int> next = next_move(next_all,true);  //Make a move on the game board
         
-
+        
         
         int v = min_search(depth-1);
         undo_move(next);  //Undo the move and restore the board
@@ -266,6 +296,7 @@ int AIShell::max_search(int depth){
 int AIShell::min_search(int depth){
     //AIMove = false;
     int best = 9999999;
+    std::cout << "------------------TEST LINE-----------------" << std::endl;
     if(depth == 0 || test_terminal_node(gameState))
         return evalutate(gameState);
     
@@ -273,7 +304,7 @@ int AIShell::min_search(int depth){
     find_all_avl(next_all);
     while(!next_all.empty()){
         
-        std::cout << "**********Current Depth: " << LIMITED_DEPTH-depth << std::endl;
+        //std::cout << "**********Current Depth: " << LIMITED_DEPTH-depth << std::endl;
         
         std::pair<int,int> next = next_move(next_all,false);
         int v = max_search(depth-1);
@@ -290,10 +321,10 @@ std::pair<int,int> AIShell::next_move(std::queue<std::pair<int,int> > &all, bool
     std::pair<int,int> next= all.front(); //Find the next move
     all.pop(); //pop the next move from queue
     
-    if(aimove == true)
-        std::cout << "AI next move is: "<<next.first << "," << next.second << std::endl;
-    else
-        std::cout << "HM next move is: "<<next.first << "," << next.second << std::endl;
+//    if(aimove == true)
+//        std::cout << "AI next move is: "<<next.first << "," << next.second << std::endl;
+//    else
+//        std::cout << "HM next move is: "<<next.first << "," << next.second << std::endl;
     gameState[next.first][next.second] = aimove? 1:-1;
     
     
@@ -316,7 +347,7 @@ int AIShell::evalutate(int **current_state){
     result += diagonal_eval(current_state);
     
     
-    std::cout << "@@This is heuristic function: " << result << std::endl;
+    //std::cout << "@@This is heuristic function: " << result << std::endl;
     
     return result;
 }
@@ -332,39 +363,68 @@ int AIShell::horizontal_eval(int **current_state){
             //int k_pieces[k];
             
             for(int i=0; i<k; i++){
-                //k_pieces[i] = current_state[col+k][row];
                 if(current_state[col+i][row] == 1){
-                    ai_pieces++;
                     ai_score += 5;
+                    ai_pieces++;
                 }
-                if(current_state[col+i][row] == 0)
+                if(current_state[col+i][row] == 0){
                     ai_score += 3;
+                    hm_score -= 3;
+                }
                 if(current_state[col+i][row] == -1){
-                    ai_score =0;
-                    break;
+                    hm_score -= 5;
+                    hm_pieces++;
                 }
             }
+            
+            if(ai_pieces != 0)
+                hm_score = 0;
+            if(hm_pieces != 0)
+                ai_score = 0;
+            
             ai_score *= ai_pieces;
+            hm_score *= hm_pieces;
             if(ai_pieces == k){
                 ai_score = 1000;
             }
-            
-            for(int i=0; i<k; i++){
-                //k_pieces[i] = current_state[col+k][row];
-                if(current_state[col+i][row] == -1){
-                    hm_pieces++;
-                    hm_score -= 5;   //Revised
-                }
-                if(current_state[col+i][row] == 0)
-                    hm_score -= 3;
-                if(current_state[col+i][row] == 1){
-                    hm_score =0;
-                    break;
-                }
-            }
-            hm_score *= hm_pieces;
-            if(hm_pieces == k)
+            if(hm_pieces == k){
                 hm_score = -1000;
+            }
+            //Old version
+//            for(int i=0; i<k; i++){
+//                //k_pieces[i] = current_state[col+k][row];
+//                if(current_state[col+i][row] == 1){
+//                    ai_pieces++;
+//                    ai_score += 5;
+//                }
+//                if(current_state[col+i][row] == 0)
+//                    ai_score += 3;
+//                if(current_state[col+i][row] == -1){
+//                    ai_score =0;
+//                    break;
+//                }
+//            }
+//            ai_score *= ai_pieces;
+//            if(ai_pieces == k){
+//                ai_score = 1000;
+//            }
+//            
+//            for(int i=0; i<k; i++){
+//                //k_pieces[i] = current_state[col+k][row];
+//                if(current_state[col+i][row] == -1){
+//                    hm_pieces++;
+//                    hm_score -= 5;   //Revised
+//                }
+//                if(current_state[col+i][row] == 0)
+//                    hm_score -= 3;
+//                if(current_state[col+i][row] == 1){
+//                    hm_score =0;
+//                    break;
+//                }
+//            }
+//            hm_score *= hm_pieces;
+//            if(hm_pieces == k)
+//                hm_score = -1000;
             
             ai_result += ai_score;
             hm_result += hm_score;
@@ -384,39 +444,68 @@ int AIShell::vertical_eval(int **current_state){
             int ai_score=0, hm_score=0,ai_pieces=0,hm_pieces=0;
             
             for(int i=0; i<k; i++){
-                //k_pieces[i] = current_state[col+k][row];
                 if(current_state[col][row+i] == 1){
-                    ai_pieces++;
                     ai_score += 5;
+                    ai_pieces++;
                 }
-                if(current_state[col][row+i] == 0)
+                if(current_state[col][row+i] == 0){
                     ai_score += 3;
+                    hm_score -= 3;
+                }
                 if(current_state[col][row+i] == -1){
-                    ai_score =0;
-                    break;
+                    hm_score -= 5;
+                    hm_pieces++;
                 }
             }
+            if(ai_pieces != 0)
+                hm_score = 0;
+            if(hm_pieces != 0)
+                ai_score = 0;
+            
             ai_score *= ai_pieces;
+            hm_score *= hm_pieces;
             if(ai_pieces == k){
                 ai_score = 1000;
             }
-            
-            for(int i=0; i<k; i++){
-                //k_pieces[i] = current_state[col+k][row];
-                if(current_state[col][row+i] == -1){
-                    hm_pieces++;
-                    hm_score -= 5;
-                }
-                if(current_state[col][row+i] == 0)
-                    hm_score -= 3;
-                if(current_state[col][row+i] == 1){
-                    hm_score =0;
-                    break;
-                }
-            }
-            hm_score *= hm_pieces;
-            if(hm_pieces == k)
+            if(hm_pieces == k){
                 hm_score = -1000;
+            }
+            
+//            //Old version
+//            for(int i=0; i<k; i++){
+//                //k_pieces[i] = current_state[col+k][row];
+//                if(current_state[col][row+i] == 1){
+//                    ai_pieces++;
+//                    ai_score += 5;
+//                }
+//                if(current_state[col][row+i] == 0)
+//                    ai_score += 3;
+//                if(current_state[col][row+i] == -1){
+//                    ai_score =0;
+//                    break;
+//                }
+//            }
+//            ai_score *= ai_pieces;
+//            if(ai_pieces == k){
+//                ai_score = 1000;
+//            }
+//            
+//            for(int i=0; i<k; i++){
+//                //k_pieces[i] = current_state[col+k][row];
+//                if(current_state[col][row+i] == -1){
+//                    hm_pieces++;
+//                    hm_score -= 5;
+//                }
+//                if(current_state[col][row+i] == 0)
+//                    hm_score -= 3;
+//                if(current_state[col][row+i] == 1){
+//                    hm_score =0;
+//                    break;
+//                }
+//            }
+//            hm_score *= hm_pieces;
+//            if(hm_pieces == k)
+//                hm_score = -1000;
             
             ai_result+=ai_score;
             hm_result+=hm_score;
@@ -437,31 +526,66 @@ int AIShell::diagonal_eval(int **current_state){
             
             for(int i=0; i<k; i++){
                 if(current_state[col+i][row+i] == 1){
-                    ai_pieces++;
                     ai_score += 5;
+                    ai_pieces++;
                 }
-                if(current_state[col+i][row+i] == 0)
+                if(current_state[col+i][row+i] == 0){
                     ai_score += 3;
-                if(current_state[col+i][row+i] == -1){
-                    ai_score =0;
-                    break;
-                }
-            }
-            ai_score *= ai_pieces;
-            
-            for(int i=0; i<k; i++){
-                if(current_state[col+i][row+i] == -1){
-                    hm_pieces++;
-                    hm_score -= 5;
-                }
-                if(current_state[col+i][row+i] == 0)
                     hm_score -= 3;
-                if(current_state[col+i][row+i] == 1){
-                    hm_score =0;
-                    break;
+                }
+                if(current_state[col+i][row+i] == -1){
+                    hm_score -= 5;
+                    hm_pieces++;
                 }
             }
+            if(ai_pieces != 0)
+                hm_score = 0;
+            if(hm_pieces != 0)
+                ai_score = 0;
+            
+            ai_score *= ai_pieces;
             hm_score *= hm_pieces;
+            if(ai_pieces == k){
+                ai_score = 1000;
+            }
+            if(hm_pieces == k){
+                hm_score = -1000;
+            }
+
+            
+//            //Old version
+//            for(int i=0; i<k; i++){
+//                if(current_state[col+i][row+i] == 1){
+//                    ai_pieces++;
+//                    ai_score += 5;
+//                }
+//                if(current_state[col+i][row+i] == 0)
+//                    ai_score += 3;
+//                if(current_state[col+i][row+i] == -1){
+//                    ai_score =0;
+//                    break;
+//                }
+//            }
+//            ai_score *= ai_pieces;
+//            if(ai_pieces == k){
+//                ai_score = 1000;
+//            }
+//            
+//            for(int i=0; i<k; i++){
+//                if(current_state[col+i][row+i] == -1){
+//                    hm_pieces++;
+//                    hm_score -= 5;
+//                }
+//                if(current_state[col+i][row+i] == 0)
+//                    hm_score -= 3;
+//                if(current_state[col+i][row+i] == 1){
+//                    hm_score =0;
+//                    break;
+//                }
+//            }
+//            hm_score *= hm_pieces;
+//            if(hm_pieces == k)
+//                hm_score = -1000;
             
             ai_result+=ai_score;
             hm_result+=hm_score;
@@ -477,31 +601,66 @@ int AIShell::diagonal_eval(int **current_state){
             
             for(int i=0; i<k; i++){
                 if(current_state[col+i][row-i] == 1){
-                    ai_pieces++;
                     ai_score += 5;
+                    ai_pieces++;
                 }
-                if(current_state[col+i][row-i] == 0)
+                if(current_state[col+i][row-i] == 0){
                     ai_score += 3;
-                if(current_state[col+i][row-i] == -1){
-                    ai_score =0;
-                    break;
-                }
-            }
-            ai_score *= ai_pieces;
-            
-            for(int i=0; i<k; i++){
-                if(current_state[col+i][row-i] == -1){
-                    hm_pieces++;
-                    hm_score -= 5;
-                }
-                if(current_state[col+i][row-i] == 0)
                     hm_score -= 3;
-                if(current_state[col+i][row-i] == 1){
-                    hm_score =0;
-                    break;
+                }
+                if(current_state[col+i][row-i] == -1){
+                    hm_score -= 5;
+                    hm_pieces++;
                 }
             }
+            if(ai_pieces != 0)
+                hm_score = 0;
+            if(hm_pieces != 0)
+                ai_score = 0;
+            
+            ai_score *= ai_pieces;
             hm_score *= hm_pieces;
+            if(ai_pieces == k){
+                ai_score = 1000;
+            }
+            if(hm_pieces == k){
+                hm_score = -1000;
+            }
+
+            
+//            //Old version
+//            for(int i=0; i<k; i++){
+//                if(current_state[col+i][row-i] == 1){
+//                    ai_pieces++;
+//                    ai_score += 5;
+//                }
+//                if(current_state[col+i][row-i] == 0)
+//                    ai_score += 3;
+//                if(current_state[col+i][row-i] == -1){
+//                    ai_score =0;
+//                    break;
+//                }
+//            }
+//            ai_score *= ai_pieces;
+//            if(ai_pieces == k){
+//                ai_score = 1000;
+//            }
+//            
+//            for(int i=0; i<k; i++){
+//                if(current_state[col+i][row-i] == -1){
+//                    hm_pieces++;
+//                    hm_score -= 5;
+//                }
+//                if(current_state[col+i][row-i] == 0)
+//                    hm_score -= 3;
+//                if(current_state[col+i][row-i] == 1){
+//                    hm_score =0;
+//                    break;
+//                }
+//            }
+//            hm_score *= hm_pieces;
+//            if(hm_pieces == k)
+//                hm_score = -1000;
             
             
             
@@ -549,7 +708,7 @@ void AIShell::find_all_avl(std::queue<std::pair<int,int> > &all){
             }
         }
     }
-    std::cout << std::endl;
+    //std::cout << std::endl;
     
 }
 
