@@ -57,14 +57,17 @@ public:
     bool test_diagonal(int **current_state);
     bool no_empty_space(int **current_state);
     
+    //Alpha-beta pruning
+    int alpha_beta_pruning(int **current_state, int alpha, int beta, int depth, bool ai_play);
+    
     //Minimax Search
     std::pair<int,int> best_move;
     bool AIMove;
     //int AIboard[10];
     
     int minimax_search(int **current_state, int depth);
-    int max_search(int depth);
-    int min_search(int depth);
+    int max_search(int depth,int alpha,int beta);
+    int min_search(int depth, int alpha, int beta);
     std::pair<int,int> next_move(std::queue<std::pair<int,int> > &all,bool aimove);
     void undo_move(std::pair<int,int> p_move);
     

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <queue>
 
-#define LIMITED_DEPTH 6
+#define LIMITED_DEPTH 4
 
 
 AIShell::AIShell(int numCols, int numRows, bool gravityOn, int** gameState, Move lastMove)
@@ -47,8 +47,10 @@ Move AIShell::makeMove(){
     //Copy game board for AI search use
     
     
-    minimax_search(gameState, LIMITED_DEPTH);
-//    std::queue<std::pair<int,int> > test;
+    //minimax_search(gameState, LIMITED_DEPTH);
+    alpha_beta_pruning(gameState, -9999999, 9999999, LIMITED_DEPTH, true);
+    
+    //    std::queue<std::pair<int,int> > test;
 //    find_all_avl(test);
 //    
 //    std::pair<int,int> t = next_move(test,true);
@@ -91,7 +93,7 @@ bool AIShell::test_horizontal(int **current_state){
         }
         
         if(count_hm == k || count_ai == k){
-            std::cout << "find horizontal winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+            //std::cout << "find horizontal winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
             //std::cout << "------------------TEST LINE-----------------" << std::endl;
             return true;
         }
@@ -119,7 +121,7 @@ bool AIShell::test_vertical(int **current_state){
         }
         
         if(count_hm==k || count_ai==k){
-            std::cout << "find vertical winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+            //std::cout << "find vertical winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
             return true;
         }
     }
@@ -148,7 +150,7 @@ bool AIShell::test_diagonal(int **current_state){
             }
         }
         if(count_hm==k || count_ai==k){
-            std::cout << "find diagonal winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+            //std::cout << "find diagonal winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
             return true;
         }
     }
@@ -172,7 +174,7 @@ bool AIShell::test_diagonal(int **current_state){
 
         }
         if(count_hm==k || count_ai==k){
-            std::cout << "find diagonal winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+            //std::cout << "find diagonal winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
             return true;
         }
     }
@@ -196,7 +198,7 @@ bool AIShell::test_diagonal(int **current_state){
             }
         }
         if(count_hm==k || count_ai==k){
-            std::cout << "find diagonal winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+            //std::cout << "find diagonal winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
             return true;
         }
     }
@@ -219,7 +221,7 @@ bool AIShell::test_diagonal(int **current_state){
             }
         }
         if(count_hm==k || count_ai==k){
-            std::cout << "find diagonal winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+            //std::cout << "find diagonal winner~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
             return true;
         }
     }
@@ -239,25 +241,36 @@ bool AIShell::no_empty_space(int **current_state){
     return true;
 }
 
-
-
-//Minimax Search Algorithm
-int AIShell::minimax_search(int **current_state, int depth){
-    //Test if is leaf node or at limited depth
-    if(test_terminal_node(current_state) || depth < 0)
+//Alpha-beta pruning
+int AIShell::alpha_beta_pruning(int **current_state, int alpha, int beta, int depth, bool ai_play){
+    if(depth==0 || test_terminal_node(current_state))
         return evalutate(current_state);
     
     if(AIMove == true)
-        return max_search(depth);
+        return max_search(depth,alpha,beta);
     else
-        return min_search(depth);
+        return min_search(depth, alpha,beta);
     
 }
 
+
+//Minimax Search Algorithm
+//int AIShell::minimax_search(int **current_state, int depth){
+//    //Test if is leaf node or at limited depth
+//    if(test_terminal_node(current_state) || depth < 0)
+//        return evalutate(current_state);
+//    
+//    if(AIMove == true)
+//        return max_search(depth);
+//    else
+//        return min_search(depth);
+//    
+//}
+
 //Max function for Minimax Search
-int AIShell::max_search(int depth){
+int AIShell::max_search(int depth,int alpha,int beta){
     int best = -9999999;
-    std::cout << "------------------TEST LINE-----------------" << std::endl;
+    //std::cout << "------------------TEST LINE-----------------" << std::endl;
     if(depth == 0 || test_terminal_node(gameState)){
         
         return evalutate(gameState);
@@ -274,29 +287,45 @@ int AIShell::max_search(int depth){
         
         
         
-        int v = min_search(depth-1);
+        int v = min_search(depth-1,alpha,beta);
         undo_move(next);  //Undo the move and restore the board
+        
+        if(depth == LIMITED_DEPTH){
+            std::cout << "The current step is: " << "(" << next.first << "," << next.second << ")" << std::endl;
+            std::cout << "Depth:" << LIMITED_DEPTH-depth <<"  MAX   ALPHA BETA V: " << alpha << "," << beta << "," << v << std::endl;
+            if(v>best){
+                std::cout << "The best value is: " << best << std::endl;
+                
+                best_move.first = next.first;
+                best_move.second = next.second;
+                
+            }
+        }
+        
+        if(v > alpha)
+            alpha = v;
         if(v > best)
             best = v;
         
-        if(depth == LIMITED_DEPTH){
-            
-            if(v>=best){
-                std::cout << "The best value is: " << best << std::endl;
-                best_move.first = next.first;
-                best_move.second = next.second;
-            }
+        
+        //std::cout << "Depth:" << LIMITED_DEPTH-depth <<"  MAX   ALPHA BETA V: " << alpha << "," << beta << "," << v << std::endl;
+        if(beta <= alpha){
+            //std::cout << "############Pruning  V:" << v << std::endl;
+            return best;
         }
+        
+        
+        
     }
     
     return best;
 }
 
 //Min function for Minimax Search.
-int AIShell::min_search(int depth){
+int AIShell::min_search(int depth,int alpha, int beta){
     //AIMove = false;
     int best = 9999999;
-    std::cout << "------------------TEST LINE-----------------" << std::endl;
+    //std::cout << "------------------TEST LINE-----------------" << std::endl;
     if(depth == 0 || test_terminal_node(gameState))
         return evalutate(gameState);
     
@@ -307,10 +336,18 @@ int AIShell::min_search(int depth){
         //std::cout << "**********Current Depth: " << LIMITED_DEPTH-depth << std::endl;
         
         std::pair<int,int> next = next_move(next_all,false);
-        int v = max_search(depth-1);
+        int v = max_search(depth-1,alpha,beta);
         undo_move(next);
+        
+        if(v < beta)
+            beta = v;
         if(v < best)
             best = v;
+        //std::cout << "Depth:" << LIMITED_DEPTH-depth <<"   MIN   ALPHA BETA V: " << alpha << "," << beta << ","  << v << std::endl;
+        if(alpha >= beta){
+            //std::cout << "############Pruning  V:" << v << std::endl;
+            return best;
+        }
     }
     
     return best;
@@ -681,7 +718,7 @@ int AIShell::diagonal_eval(int **current_state){
  Put in a queue, First in first out
  */
 void AIShell::find_all_avl(std::queue<std::pair<int,int> > &all){
-    std::cout << "Available moves: " << std::endl;
+    //std::cout << "Available moves: " << std::endl;
     if (gravityOn == true){
         for(int col=0; col<numCols; col++){
             for(int row=0; row<numRows; row++){
@@ -690,7 +727,7 @@ void AIShell::find_all_avl(std::queue<std::pair<int,int> > &all){
                     std::pair<int,int> now;
                     now =std::make_pair(col, row);
                     all.push(now);
-                    std::cout << " (" << all.back().first << "," << all.back().second << ")";
+                    //std::cout << " (" << all.back().first << "," << all.back().second << ")";
                     break;
                 }
             }
@@ -703,7 +740,7 @@ void AIShell::find_all_avl(std::queue<std::pair<int,int> > &all){
                     std::pair<int,int> now;
                     now =std::make_pair(col, row);
                     all.push(now);
-                    std::cout << " (" << all.back().first << "," << all.back().second << ")";
+                    //std::cout << " (" << all.back().first << "," << all.back().second << ")";
                 }
             }
         }
