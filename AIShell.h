@@ -64,6 +64,7 @@ public:
     
     //Iterative deepening search
     int iterative_deepening_alpha_beta(int **current_state);
+    int ids_depth;
     //Minimax Search
     std::pair<int,int> best_move;
     std::pair<int,int> final_best_move;

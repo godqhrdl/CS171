@@ -251,14 +251,13 @@ bool AIShell::no_empty_space(int **current_state){
 int AIShell::iterative_deepening_alpha_beta(int **current_state){
     //Time limit
     start = clock();
-    int depth = 0;
+    ids_depth = 0;
     while((clock()-start)*1000/CLOCKS_PER_SEC < 5000){
-        final_best_move.first = best_move.first;
-        final_best_move.second = best_move.second;
-        std::cout << "Current depth:" << depth << std::endl;
-        alpha_beta_pruning(current_state, -9999999, 9999999, depth, true);
+        
+        std::cout << "Current depth:" << ids_depth << std::endl;
+        alpha_beta_pruning(current_state, -9999999, 9999999, ids_depth, true);
 
-        depth++;
+        ids_depth++;
     }
     std::cout << "END" << std::endl;
     
@@ -304,14 +303,14 @@ int AIShell::max_search(int depth,int alpha,int beta){
     }
     
     //@@@@@@@@@@@@@@@@@@@@@@@@@
-    if((clock()-start)*1000/CLOCKS_PER_SEC > 4900)
+    if((clock()-start)*1000/CLOCKS_PER_SEC > 5000)
         return evalutate(gameState);
     
     
     std::queue<std::pair<int,int> > next_all; //A queue contains all availabe moves
     find_all_avl(next_all);
     while(!next_all.empty()){
-        if((clock()-start)*1000/CLOCKS_PER_SEC > 4900)
+        if((clock()-start)*1000/CLOCKS_PER_SEC > 5000)
             return evalutate(gameState);
         //std::cout << "**********Current Depth: " << LIMITED_DEPTH-depth << std::endl;
         
@@ -322,7 +321,7 @@ int AIShell::max_search(int depth,int alpha,int beta){
         int v = min_search(depth-1,alpha,beta);
         undo_move(next);  //Undo the move and restore the board
         
-        if(depth == LIMITED_DEPTH){
+        if(depth == ids_depth){
             std::cout << "The current step is: " << "(" << next.first << "," << next.second << ")" << std::endl;
             std::cout << "Depth:" << LIMITED_DEPTH-depth <<"  MAX   ALPHA BETA V: " << alpha << "," << beta << "," << v << std::endl;
             if(v>best){
@@ -350,6 +349,12 @@ int AIShell::max_search(int depth,int alpha,int beta){
         
     }
     
+    if(depth == ids_depth){
+        final_best_move.first = best_move.first;
+        final_best_move.second = best_move.second;
+        std::cout << "Find final move@@@@@@@@@@@@@@@@@@@" << std::endl;
+    }
+    
     return best;
 }
 
@@ -362,13 +367,13 @@ int AIShell::min_search(int depth,int alpha, int beta){
         return evalutate(gameState);
     
     //@@@@@@@@@@@@@@@@@@@@@@@
-    if((clock()-start)*1000/CLOCKS_PER_SEC > 4900)
+    if((clock()-start)*1000/CLOCKS_PER_SEC > 5000)
         return evalutate(gameState);
     
     std::queue<std::pair<int,int> > next_all; //A queue contains all available moves
     find_all_avl(next_all);
     while(!next_all.empty()){
-        if((clock()-start)*1000/CLOCKS_PER_SEC > 4900)
+        if((clock()-start)*1000/CLOCKS_PER_SEC > 5000)
             return evalutate(gameState);
         //std::cout << "**********Current Depth: " << LIMITED_DEPTH-depth << std::endl;
         
@@ -670,7 +675,7 @@ int AIShell::diagonal_eval(int **current_state){
     
     
     // (\)
-    for(int col=0; col<numCols-k; col++){
+    for(int col=0; col<=numCols-k; col++){
         for(int row=numRows-1; row+1>=k; row--){
             int ai_score=0, hm_score=0,ai_pieces=0,hm_pieces=0;
             
