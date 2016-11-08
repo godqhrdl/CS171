@@ -3,7 +3,7 @@
 #include <queue>
 #include <algorithm>
 
-#define LIMITED_DEPTH 5
+#define LIMITED_DEPTH 4
 
 
 AIShell::AIShell(int numCols, int numRows, bool gravityOn, int** gameState, Move lastMove)
@@ -19,7 +19,7 @@ AIShell::AIShell(int numCols, int numRows, bool gravityOn, int** gameState, Move
 	this->AIMove = true;
 	this->best_move.first = 0;
 	this->best_move.second = 0;
-
+	this->searchCutoff = false;
 }
 
 
@@ -43,12 +43,11 @@ Move AIShell::makeMove(){
 
 	evalutate(gameState);
 
-	//Minimax search
+	iterative_deepening_search(gameState);
 
-	//Copy game board for AI search use
+	//minimax_search(gameState, LIMITED_DEPTH);
 
 
-	minimax_search(gameState, LIMITED_DEPTH);
 	//    std::queue<std::pair<int,int> > test;
 	//    find_all_avl(test);
 	//    
@@ -258,65 +257,6 @@ int AIShell::minimax_search(int **current_state, int depth){
 
 }
 
-//Max function for Minimax Search
-int AIShell::max_search(int depth){
-	int best = -9999999;
-	//std::cout << "------------------TEST LINE-----------------" << std::endl;
-	if (depth == 0 || test_terminal_node(gameState)){
-
-		return evalutate(gameState);
-	}
-
-
-	std::queue<std::pair<int, int> > next_all; //A queue contains all availabe moves
-	find_all_avl(next_all);
-	while (!next_all.empty()){
-
-		//std::cout << "**********Current Depth: " << LIMITED_DEPTH-depth << std::endl;
-
-		std::pair<int, int> next = next_move(next_all, true);  //Make a move on the game board
-
-		int v = min_search(depth - 1);
-		undo_move(next);  //Undo the move and restore the board
-		if (v > best)
-			best = v;
-
-		if (depth == LIMITED_DEPTH){
-
-			if (v >= best){
-				std::cout << "The best value is: " << best << std::endl;
-				best_move.first = next.first;
-				best_move.second = next.second;
-			}
-		}
-	}
-
-	return best;
-}
-
-//Min function for Minimax Search.
-int AIShell::min_search(int depth){
-	//AIMove = false;
-	int best = 9999999;
-	//std::cout << "------------------TEST LINE-----------------" << std::endl;
-	if (depth == 0 || test_terminal_node(gameState))
-		return evalutate(gameState);
-
-	std::queue<std::pair<int, int> > next_all; //A queue contains all available moves
-	find_all_avl(next_all);
-	while (!next_all.empty()){
-
-		//std::cout << "**********Current Depth: " << LIMITED_DEPTH-depth << std::endl;
-
-		std::pair<int, int> next = next_move(next_all, false);
-		int v = max_search(depth - 1);
-		undo_move(next);
-		if (v < best)
-			best = v;
-	}
-
-	return best;
-}
 
 //AI will use this function while searching
 std::pair<int, int> AIShell::next_move(std::queue<std::pair<int, int> > &all, bool aimove){
@@ -391,7 +331,7 @@ int AIShell::horizontal_eval(int **current_state){
 			if (hm_pieces == k){
 				hm_score = -1000;
 			}
-			
+
 			ai_result += ai_score;
 			hm_result += hm_score;
 
@@ -521,7 +461,7 @@ int AIShell::diagonal_eval(int **current_state){
 			if (hm_pieces == k){
 				hm_score = -1000;
 			}
-			
+
 			ai_result += ai_score;
 			hm_result += hm_score;
 		}
@@ -585,12 +525,15 @@ void AIShell::print_current_state(int **current_state){
 //alpha-beta pruning
 
 int AIShell::max_search(int depth, int alpha, int beta){
-	//int best = -9999999;
-	//std::cout << "------------------TEST LINE-----------------" << std::endl;
-	if (depth == 0 || test_terminal_node(gameState)){
+	startTime = clock();
+	if (depth == 0 || test_terminal_node(gameState) ){
 
 		return evalutate(gameState);
 	}
+
+	if ((clock() - startTime) * 1000 / (double)CLOCKS_PER_SEC > 5000)
+		return evalutate(gameState);
+
 	int v = -9999999;
 
 	std::queue<std::pair<int, int> > next_all; //A queue contains all availabe moves
@@ -601,35 +544,41 @@ int AIShell::max_search(int depth, int alpha, int beta){
 
 		std::pair<int, int> next = next_move(next_all, true);  //Make a move on the game board
 		v = std::max(v, min_search(depth - 1, alpha, beta));
+		startTime = clock();
 		undo_move(next);  //Undo the move and restore the board
-		
+
 		//alpha = std::max(alpha, v);
-		
+
 		if (v > alpha){
 			alpha = v;
 			std::cout << "The best value is: " << v << std::endl;
 			best_move.first = next.first;
 			best_move.second = next.second;
 		}
-		
+		//if ((clock() - startTime) * 1000 / (double)CLOCKS_PER_SEC > 5000){
+			//std::cout << "terminate!!!!!" << std::endl;
+			//break;
+		//}
 		if (beta <= alpha)
 			break;
-		
 
-		
+
+
 	}
 	//std::cout << "alpha: " << alpha << std::endl;
 	return v;
 }
 
 //Min function for Minimax Search.
-int AIShell::min_search(int depth,int alpha, int beta){
-	//AIMove = false;
-	//int best = 9999999;
-	//std::cout << "------------------TEST LINE-----------------" << std::endl;
+int AIShell::min_search(int depth, int alpha, int beta){
+	startTime = clock();
+
 	if (depth == 0 || test_terminal_node(gameState))
 		return evalutate(gameState);
-
+	
+	if ((clock() - startTime) * 1000 / (double)CLOCKS_PER_SEC > 5000)
+		return evalutate(gameState);
+	
 	int v = 9999999;
 	std::queue<std::pair<int, int> > next_all; //A queue contains all available moves
 	find_all_avl(next_all);
@@ -639,15 +588,57 @@ int AIShell::min_search(int depth,int alpha, int beta){
 
 		std::pair<int, int> next = next_move(next_all, false);
 		v = std::min(v, max_search(depth - 1, alpha, beta));
+		startTime = clock();
 		undo_move(next);
-				
+
 		//beta = std::min(beta, v);
 		if (v < beta)
 			beta = v;
-
+		//if ((clock() - startTime) * 1000 / (double)CLOCKS_PER_SEC > 5000)
+			//break;
 		if (beta <= alpha)
 			break;
 	}
 	//std::cout << "beta: " << beta << std::endl;
 	return v;
+}
+
+int AIShell::iterative_deepening_search(int **current_state){
+	int depth = 0;
+	int score = 0;
+	
+	while (true){
+		startTime = clock();
+		if ((clock() - startTime) * 1000 / (double)CLOCKS_PER_SEC > 5000)
+			break;
+
+		int searchResult = alpha_beta_pruning(current_state, -9999999, 9999999, depth);
+		if (!searchCutoff) {
+			score = searchResult;
+		}
+		std::cout << "depth: " << depth << std::endl;
+		depth++;
+	}
+	std::cout << "111111111111" << std::endl;
+	return score;
+	
+}
+
+//Alpha-beta pruning
+int AIShell::alpha_beta_pruning(int **current_state, int alpha, int beta, int depth){
+
+	if (test_terminal_node(current_state) || depth == 0)
+		return evalutate(current_state);
+
+	if (AIMove == true){
+		//return max_search(depth);
+		std::cout << "MAX end" << std::endl;
+		return max_search(depth, alpha, beta);
+	}
+	else{
+		//return min_search(depth);
+		std::cout << "MIN end" << std::endl;
+		return min_search(depth, alpha, beta);
+	}
+
 }
