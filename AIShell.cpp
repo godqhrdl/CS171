@@ -43,24 +43,12 @@ Move AIShell::makeMove(){
     evalutate(gameState);
     
     //Minimax search
-    
-    //Copy game board for AI search use
-    
-    
     //minimax_search(gameState, LIMITED_DEPTH);
-    
-    
     //alpha_beta_pruning(gameState, -9999999, 9999999, LIMITED_DEPTH, true);
+    
     iterative_deepening_alpha_beta(gameState);
     
-    //    std::queue<std::pair<int,int> > test;
-//    find_all_avl(test);
-//    
-//    std::pair<int,int> t = next_move(test,true);
-//    print_current_state(gameState);
-//    
-//    undo_move(t);
-//    print_current_state(gameState);
+
     
     Move f(final_best_move.first,final_best_move.second);
     std::cout << "Final move: " << best_move.first << "," << best_move.second << std::endl;
@@ -308,6 +296,10 @@ int AIShell::max_search(int depth,int alpha,int beta){
     
     
     std::queue<std::pair<int,int> > next_all; //A queue contains all availabe moves
+    
+    if(depth == ids_depth && ids_depth>1)
+        next_all.push(final_best_move);
+    
     find_all_avl(next_all);
     while(!next_all.empty()){
         if((clock()-start)*1000/CLOCKS_PER_SEC > 5000)
@@ -780,6 +772,9 @@ void AIShell::find_all_avl(std::queue<std::pair<int,int> > &all){
             for(int row=0; row<numRows; row++){
                 if(gameState[col][row] == NO_PIECE){
                     //std::cout << " (" << col << "," << row << ")" ;
+                    
+                    //Changed$$$$$$$$$$$$$$
+                    
                     std::pair<int,int> now;
                     now =std::make_pair(col, row);
                     all.push(now);
