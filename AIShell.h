@@ -4,9 +4,10 @@
 #pragma once
 #include "Move.h"
 #include <queue>
-#include <ctime>
+#include <time.h>
 #include <string>
-
+#include <iomanip>
+#include <chrono>
 
 // A new AIShell will be created for every move request.
 class AIShell{
@@ -38,6 +39,7 @@ public:
 
 	//Find all available move
 	void find_all_avl(std::queue<std::pair<int, int> > &all);
+	int total_pieces;
 	//void print_all_aval(std::queue<std::pair<int,int> > all);
 
 	//Evaluate Function
@@ -58,13 +60,19 @@ public:
 	bool no_empty_space(int **current_state);
 
 	//Alpha-beta pruning
-	int alpha_beta_pruning(int **current_state, int alpha, int beta, int depth);
+	int alpha_beta_pruning(int **current_state, int alpha, int beta, int depth, bool ai_play);
 
+	//Iterative deepening search
+	int iterative_deepening_alpha_beta(int **current_state);
+	int ids_depth;
 	//Minimax Search
 	std::pair<int, int> best_move;
+	std::pair<int, int> final_best_move;
 	bool AIMove;
-	bool searchCutoff;
+	clock_t start;
 
+	std::chrono::steady_clock::time_point start_time;
+	std::chrono::steady_clock::time_point end_time;
 	//int AIboard[10];
 
 	int minimax_search(int **current_state, int depth);
@@ -77,13 +85,12 @@ public:
 	//Print current gameboard for debugging
 	void print_current_state(int **current_state);
 
-	//Iterative Deepening Search
-	int iterative_deepening_search(int **current_state);
+	//void find_all_avl2(std::map<int, std::pair<int, int>, std::greater<int> > &all);
+	std::queue<std::pair<int, int> > best_path;
+	//std::vector<std::pair<int, int> > best_path;
 
-
-	clock_t startTime;
-
-
+	void clear(std::queue<std::pair<int, int> > &q);
+	
 };
 
 #endif //AISHELL_H
